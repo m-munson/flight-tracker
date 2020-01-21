@@ -1,15 +1,26 @@
 # flight-tracker
 flight tracking map generation scripts -basemap based
+
+
 ########## Aviation edge tanks out a fair bit for what ever reason, and the JSON files will throw an error 'key value not found' ########## or something similar, which causes everything to fail, as there is no json data to sort and put in the csv for the ########## map program to pull. Beyond end user control.
+
+
+
+
 
 1/20/20
 File descriptions
+
+
 AA-run.sh;
-  Script that executes the various scripts in the correct order [PLACE IN CRONTAB --field test has been successful on systems with
-  down to every 2 minutes]
+  Script that executes the various scripts in the correct order [PLACE IN CRONTAB --field test has been successful on systems   down to every 2 minutes]
+  
+  
 Json-pull.py;
   script that pulls data from the API, currently set to pull enroute flights from an array of airlines, filter the json and output             CSV files with the format of [flight number],[LAT],[Long] per row and consolodate them all in one file ALL.CSV plus a json and csv file per airline. 
 BASIC LOGGING IS ENABLED --need to improve later.
+
+
 
 day-night.py;
   Pulls the data from ALL.CSV and plots the flights on the map, renders the day night shader, places the time stamp on the map.
@@ -17,13 +28,21 @@ day-night.py;
   flights.png that is forced the science on a sphere system through another script every few moments.
   BASIC LOGGING ENABLED --Improve later
   
+  
+  
 gut.py;
   Simply opens and closes, with out writing anything to them the csv and json files so we start with empty files for each cycle.
   BASIC LOGGING IS ENABLED
   
+  
+  
 requirements.txt
   all the dependencies for this to run properly. 
   LOGGING UNNEEDED
+  
+  
+  
+  
   
 FOLDER LAYOUT
 
