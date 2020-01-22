@@ -4,7 +4,7 @@ import json
 import time
 #setup
 timestr = time.strftime("%Y-%m-%d___%H:%M:%S")
-API_KEY="6005fc-ece0a5-499db2-3bd458-f0505e"
+API_KEY="--API KEY---"
 # DEBUG url = "https://aviation-edge.com/v2/public/airplaneDatabase?key="
 url2 = "http://aviation-edge.com/api/public/flights?&key="
 # DEBUG airline = "&codeIataAirline=AA"
