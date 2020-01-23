@@ -1,64 +1,77 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
+import matplotlib as mpl
+mpl.use('Agg') ##lets me run this in cron
+import numpy as np
+from mpl_toolkits.basemap import Basemap
+import matplotlib.pyplot as plt
+#import matplotlib.cbook as cbook
+#import matplotlib.image as mpimg
+from datetime import datetime
 import time
-import numpy
-from sos_connection import SOSConnection
+import csv
+import os
+from PIL import Image
 
-###############################################################################
-# Number of seconds to show the flights image
-IMAGE_DURATION = 120
+lats,lons,names = [],[],[]
+print ("CREATING MAP")
+# miller projection
+plt.figure(figsize=(13,6.5))
+timestr = time.strftime("%Y-%m-%d  %H:%M")
+map = Basemap(projection='cyl')#, resolution= None#ax=axes  area_thresh=None
+# plot coastlines
+map.drawcoastlines(linewidth=0.1, color='k')
+#map.drawmapboundary(fill_color='#1300af')
+map.drawmapboundary(fill_color='#0080ff')
+map.fillcontinents(color='#333333',lake_color='#0080ff')
+map.drawrivers(linewidth=0.1, linestyle='solid', color='k')
+map.drawcountries(linewidth=0.15, linestyle='solid', color='grey', antialiased=1, ax=None, zorder=None)
+# shade the night areas, with alpha transparency so the
+# map shows through. Use current time in UTC.
+### PULLS DATA FROM CSV >>>FLIGHT,LAT,LON
 
-# Name of image to display
-IMAGE_NAME = "/shared/sos/json/dataset/flights.png"
-PIP_NAME = "/shared/sos/json/legend.png"
+with open('/shared/sos/json/geo/ALL.csv') as csvfile:
+    reader = csv.reader(csvfile,delimiter=',')
+    for data in reader:
+        names.append(str(data[0]))
+        lats.append(float(data[1]))
+        lons.append(float(data[2]))
+x,y = map(lons,lats)
+#x,y,name = map(lons,lats,names)
+#name = map(names)
+map.plot(x,y,'r*',markersize=0.05,color='white',marker=',')
+#plt.text(x,y,name, fontsize=4,color='grey')
 
-# Fade step size
-FADE_STEP_SIZE = 0.005
-###################################################################
-# alpha_start: Start of alpha value for fade. Valid values are [0.0-1.0].
-# alpha_end: End of alpha value for fade. Valid values are [0.0-1.0].
-# step: How much to change alpha at each iteration. (Negative value should be
-#       used if decrementing (i.e. fading out)).
+with open('/shared/sos/json/geo/AAL.csv') as csvfile:
+    reader = csv.reader(csvfile,delimiter=',')
+    for data in reader:
+        names.append(str(data[0]))
+        lats.append(float(data[1]))
+        lons.append(float(data[2]))
+f,g = map(lons,lats)
+map.plot(f,g,'r*',markersize=0.02,color='#FF2400',marker=',')
 
-#log = open("/shared/sos/json/logs/AVedge.txt","a")
-#log.writelines("-----CONNECTION Attempting----" + timestr +"\n")
-#log.close()
+#plt.imshow(plt.imread('/shared/sos/json/legend.png'),  extent = (x0, x1, y0, y1))
+a,b = map(-30,-15)
+plt.text(a,b,timestr, fontsize='xx-small',color='white')    ##########TIMESTAMP FOR MAP >>ATLANTIC<<
+plt.text(a-120,b,timestr, fontsize='xx-small',color='white')    ##########TIMESTAMP FOR MAP >>Pacific<<
+plt.text(a+118,b,timestr, fontsize='xx-small',color='white')    ##########TIMESTAMP FOR MAP >>INDIAN<<
 
-def fade(alpha_start, alpha_end, step):
-    for i in numpy.arange(alpha_start, alpha_end, step):
-        conn.send("layer top alpha {0}".format(i))
+m, n = map(-20, -20)
+#img = mpimg.imread('/shared/sos/json/legend.png')
+#m.imshow(img, extent=(m,m-10,n,n-20)
 
 
-if __name__ == '__main__':
 
-    # Connect to SOS.
-    conn = SOSConnection()
-    conn.connect()
 
-    # Load clip.
-    conn.send("play 1")
+log=open("/shared/sos/json/logs/AVedge.txt","a")
+log.writelines("GENERATED----MAP ----" + timestr +"\n")
+#x, y = map(40.8228,47.9151)
+#plt.plot(x, y, marker='D',color='yellow',markersize=1)
 
-    while True:
-        # Load overlay.
-	timestr = time.strftime("%Y%m%d-%H %M %S")
-        conn.send("overlay {0}".format(IMAGE_NAME))
-	print("NEXT!" + timestr)
-	
-        # Fade in overlay from 0.0 to 1.0 using fade step size.
-        #fade(0.0, 1.0, FADE_STEP_SIZE)
-################ ATLANTIC PIP
-	conn.send("pip {0}".format(PIP_NAME))
-	conn.send("pipstyle globe")
-	#conn.send("pipcoords -25,-40")	
-	conn.send("pipvertical -23")
-	conn.send("piphorizontal -18")	
-	conn.send("pipheight 15")
-	conn.send("pipwidth 25")
-################ INDIAN PIP
-	conn.send("pip {0}".format(PIP_NAME))
-	conn.send("pipstyle globe")
-	conn.send("pipvertical -23")
-	conn.send("piphorizontal 100")	
-	conn.send("pipheight 15")
-	conn.send("pipwidth 25")
-#####
+date = datetime.utcnow()
+CS=map.nightshade(date)
+
+#plt.title('Day/Night Map for %s (UTC)' %strftime("%d %b %Y %H:%M:%S"))
+#plt.show()
+plt.savefig( '/shared/sos/json/dataset/'+timestr+".png", bbox_inches = 'tight', pad_inches = -0.037, dpi=200)
+plt.savefig( "/shared/sos/json/dataset/flights.png", bbox_inches = 'tight', pad_inches = -0.037, dpi=200)
